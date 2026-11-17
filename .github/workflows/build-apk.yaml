@@ -35,7 +35,26 @@ jobs:
 
       - run: flutter pub get
       - run: dart run flutter_launcher_icons
-      - run: flutter build apk --release --no-shrink
+      - run: flutter build apk --release
+
+      - name: Add R8 keep rules
+        run: |
+          test -f android/app/build.gradle.kts
+          cat > android/app/proguard-rules.pro <<'EOF'
+          -dontwarn com.google.mlkit.vision.text.chinese.**
+          -dontwarn com.google.mlkit.vision.text.devanagari.**
+          -dontwarn com.google.mlkit.vision.text.japanese.**
+          -dontwarn com.google.mlkit.vision.text.korean.**
+          EOF
+          cat >> android/app/build.gradle.kts <<'EOF'
+
+          android {
+              buildTypes {
+                  getByName("release") {
+                      proguardFiles("proguard-rules.pro")
+                  }
+              }
+          }
 
       - name: Rename APK
         run: cp build/app/outputs/flutter-apk/app-release.apk OpenLeaf.apk
