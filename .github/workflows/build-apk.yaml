@@ -25,17 +25,11 @@ jobs:
           channel: stable
           cache: true
 
-      # The repo holds only lib/, assets/ and pubspec.yaml.
-      # The Android project is generated fresh on every build.
       - name: Generate Android scaffold
         run: |
           flutter create --platforms=android --project-name openleaf --org com.openleaf /tmp/scaffold
           cp -r /tmp/scaffold/android ./android
           sed -i 's/android:label="[^"]*"/android:label="OpenLeaf"/' android/app/src/main/AndroidManifest.xml
-
-      - run: flutter pub get
-      - run: dart run flutter_launcher_icons
-      - run: flutter build apk --release
 
       - name: Add R8 keep rules
         run: |
@@ -55,6 +49,11 @@ jobs:
                   }
               }
           }
+          EOF
+
+      - run: flutter pub get
+      - run: dart run flutter_launcher_icons
+      - run: flutter build apk --release
 
       - name: Rename APK
         run: cp build/app/outputs/flutter-apk/app-release.apk OpenLeaf.apk
